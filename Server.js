@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import UserRoutes from "./Routes/Users.js";
+import VideoRoutes from "./Routes/Videos.js";
 
 
 
@@ -32,7 +33,10 @@ app.use(cors({
 
 
 app.use("/api/auth", UserRoutes);
+app.use("/api/video", VideoRoutes);
 
+
+app.use("/Videos", express.static("./Videos"));
 
 
 const PORT = 5000;
