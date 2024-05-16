@@ -38,4 +38,40 @@ const Upload_Video = async (req, res, next) => {
 }
 
 
-export { upload, Upload_Video }
+const FetchVideos = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+
+        const total = await Video.countDocuments();
+
+        const videos = await Video.find().skip(startIndex).limit(limit);
+
+        const pagination = {};
+
+        if (endIndex < total) {
+            pagination.next = {
+                page: page + 1,
+                limit: limit
+            };
+        }
+
+        if (startIndex > 0) {
+            pagination.prev = {
+                page: page - 1,
+                limit: limit
+            };
+        }
+
+        res.status(200).json({ total: total, videos: videos, pagination: pagination });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+export { upload, Upload_Video, FetchVideos }
