@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import User from "../Models/Users.js";
 import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from 'uuid';
+import jwt from "jsonwebtoken";
 
 
 
@@ -16,8 +17,8 @@ const SignUp = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
-        if (!isValidEmail(email)) {
-            return res.status(400).json({ message: 'Invalid email format' });
+        if (!email || !password) {
+            res.status(400).json({ message: "All fiels are required.." });
         }
 
         let user = await User.findOne({ email });
@@ -27,11 +28,13 @@ const SignUp = async (req, res, next) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        user = new User({ email, password: hashedPassword });
+        const verificationCode = generateVerificationCode();
+
+        user = new User({ email, password: hashedPassword, verification_code: verificationCode });
 
         await user.save();
 
-        const verificationCode = generateVerificationCode();
+
 
         await sendVerificationEmail(email, verificationCode);
 
@@ -40,6 +43,7 @@ const SignUp = async (req, res, next) => {
         res.status(201).json({ token, user });
     } catch (err) {
         res.status(500).json({ message: err.message });
+        console.log(err);
     }
 }
 
@@ -47,9 +51,9 @@ const SignUp = async (req, res, next) => {
 async function sendVerificationEmail(email, verificationcode) {
     try {
         let transporter = nodemailer.createTransport({
-            secure: false, //also tried 'true'
+            secure: false,
             port: 587,
-            //also tried 25 and 465
+
             service: "gmail",
             auth: {
                 user: "ignitelinesgh@gmail.com",
@@ -73,4 +77,34 @@ async function sendVerificationEmail(email, verificationcode) {
 }
 
 
-export { SignUp }
+const Login = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+
+
+        if (!email || !password) {
+            res.status(400).json({ message: "All fiels are required.." });
+        }
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid password' });
+        }
+
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+
+        res.status(200).json({ token, user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message });
+    }
+}
+
+
+
+export { SignUp, Login }
