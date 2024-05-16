@@ -2,7 +2,15 @@ import express from "express";
 import bcrypt from "bcrypt";
 import User from "../Models/Users.js";
 import nodemailer from "nodemailer";
+import { v4 as uuidv4 } from 'uuid';
 
+
+
+function generateVerificationCode() {
+    const uuid = uuidv4();
+    const verificationCode = uuid.substr(0, 6);
+    return verificationCode;
+}
 
 const SignUp = async (req, res, next) => {
     try {
@@ -29,14 +37,14 @@ const SignUp = async (req, res, next) => {
 
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
 
-        res.status(201).json({ token, message: 'User created successfully. Check your email for verification code' });
+        res.status(201).json({ token, user });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 }
 
 
-async function sendVerificationEmail(email, code) {
+async function sendVerificationEmail(email, verificationcode) {
     try {
         let transporter = nodemailer.createTransport({
             secure: false, //also tried 'true'
@@ -57,9 +65,12 @@ async function sendVerificationEmail(email, code) {
             from: '"Your App" <yourapp@example.com>',
             to: email,
             subject: 'Email Verification Code',
-            text: `Your verification code is: ${code}`,
+            text: `Your verification code is: ${verificationcode}`,
         });
     } catch (error) {
         throw new Error('Failed to send verification email');
     }
 }
+
+
+export { SignUp }
