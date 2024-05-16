@@ -4,6 +4,7 @@ import User from "../Models/Users.js";
 import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from 'uuid';
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 
 
@@ -64,9 +65,8 @@ async function sendVerificationEmail(email, verificationcode) {
             },
         });
 
-        // Send email with verification code
         await transporter.sendMail({
-            from: '"Your App" <yourapp@example.com>',
+            from: 'VideoM Video Plaform',
             to: email,
             subject: 'Email Verification Code',
             text: `Your verification code is: ${verificationcode}`,
@@ -106,5 +106,80 @@ const Login = async (req, res, next) => {
 }
 
 
+const Email_Confirm_Verification = async (req, res, next) => {
+    try {
+        const { email, verification_code } = req.body;
 
-export { SignUp, Login }
+        const user = await User.findOne({ email, verification_code });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid verification code or email' });
+        }
+
+        User.isVerified = true;
+        await user.save();
+
+        res.status(200).json({ message: 'Email verified successfully', user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+
+const Reset_Password = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const resetToken = crypto.randomBytes(20).toString('hex');
+
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = Date.now() + 3600000; // Token expires in 1 hour
+        await user.save();
+
+        await sendResetPasswordEmail(email, resetToken);
+
+        res.status(200).json({ message: 'Password reset email sent successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+async function sendResetPasswordEmail(email, resetToken) {
+    try {
+        let transporter = nodemailer.createTransport({
+            secure: false,
+            port: 587,
+
+            service: "gmail",
+            auth: {
+                user: "ignitelinesgh@gmail.com",
+                pass: "rawumjggboumnqjp",
+            },
+            tls: {
+                rejectUnauthorized: false,
+            },
+        });
+
+        const resetUrl = `http://yourdomain.com/reset-password?token=${resetToken}`;
+
+        await transporter.sendMail({
+            from: 'VideoM Video Plaform',
+            to: email,
+            subject: 'Reset Password',
+            text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`,
+        });
+    } catch (error) {
+        console.error('Failed to send reset password email:', error);
+        throw new Error('Failed to send reset password email');
+    }
+}
+
+export { SignUp, Login, Email_Confirm_Verification, Reset_Password }
