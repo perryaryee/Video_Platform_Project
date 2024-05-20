@@ -127,7 +127,7 @@ const Email_Confirm_Verification = async (req, res, next) => {
 }
 
 
-const Reset_Password = async (req, res, next) => {
+const Forgot_Password = async (req, res, next) => {
     try {
         const { email } = req.body;
 
@@ -168,7 +168,7 @@ async function sendResetPasswordEmail(email, resetToken) {
             },
         });
 
-        const resetUrl = `http://yourdomain.com/reset-password?token=${resetToken}`;
+        const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
 
         await transporter.sendMail({
             from: 'VideoM Video Plaform',
@@ -182,4 +182,32 @@ async function sendResetPasswordEmail(email, resetToken) {
     }
 }
 
-export { SignUp, Login, Email_Confirm_Verification, Reset_Password }
+
+const Reset_Password = async (req, res, next) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired token' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        user.password = hashedPassword;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.status(200).json({ message: 'Password reset successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+export { SignUp, Login, Email_Confirm_Verification, Forgot_Password, Reset_Password }
