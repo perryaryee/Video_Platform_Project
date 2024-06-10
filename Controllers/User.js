@@ -174,7 +174,7 @@ async function sendResetPasswordEmail(email, resetToken) {
             from: 'VideoM Video Plaform',
             to: email,
             subject: 'Reset Password',
-            text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`,
+            text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nLink expires in an hour`,
         });
     } catch (error) {
         console.error('Failed to send reset password email:', error);
@@ -185,7 +185,7 @@ async function sendResetPasswordEmail(email, resetToken) {
 
 const Reset_Password = async (req, res, next) => {
     try {
-        const { token, newPassword } = req.body;
+        const { token, password } = req.body;
 
         const user = await User.findOne({
             resetPasswordToken: token,
@@ -196,7 +196,7 @@ const Reset_Password = async (req, res, next) => {
             return res.status(400).json({ message: 'Invalid or expired token' });
         }
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         user.password = hashedPassword;
         user.resetPasswordToken = undefined;
