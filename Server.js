@@ -39,8 +39,6 @@ app.use(cors({
 app.use("/api/auth", UserRoutes);
 app.use("/api/video", VideoRoutes);
 app.use("/api/admin", AdminRoutes);
-
-
 app.use("/Videos", express.static("./Videos"));
 
 
