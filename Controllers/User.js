@@ -5,6 +5,7 @@ import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from 'uuid';
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { blacklistedTokens } from "../Middlewares/VerfifyToken.js";
 
 
 
@@ -66,7 +67,7 @@ async function sendVerificationEmail(email, verificationcode) {
         });
 
         await transporter.sendMail({
-            from: 'VideoM Video Plaform',
+            from: 'As Video Plaform',
             to: email,
             subject: 'Email Verification Code',
             text: `Your verification code is: ${verificationcode}`,
@@ -93,7 +94,7 @@ const Login = async (req, res, next) => {
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Invalid password' });
+            return res.status(401).json({ message: 'Invalid  credentials' });
         }
 
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
@@ -140,7 +141,7 @@ const Forgot_Password = async (req, res, next) => {
         const resetToken = crypto.randomBytes(20).toString('hex');
 
         user.resetPasswordToken = resetToken;
-        user.resetPasswordExpires = Date.now() + 3600000; // Token expires in 1 hour
+        user.resetPasswordExpires = Date.now() + 3600000;
         await user.save();
 
         await sendResetPasswordEmail(email, resetToken);
@@ -171,7 +172,7 @@ async function sendResetPasswordEmail(email, resetToken) {
         const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
 
         await transporter.sendMail({
-            from: 'VideoM Video Plaform',
+            from: 'AS Video Plaform',
             to: email,
             subject: 'Reset Password',
             text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nLink expires in an hour`,
@@ -210,4 +211,16 @@ const Reset_Password = async (req, res, next) => {
     }
 }
 
-export { SignUp, Login, Email_Confirm_Verification, Forgot_Password, Reset_Password }
+const Logout_User = (req, res) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (token) {
+        blacklistedTokens.add(token);
+        console.log(`Token ${token} added to blacklist`); // Debug log
+    }
+
+    res.status(200).json({ message: 'Logout successful' });
+};
+
+export { SignUp, Login, Email_Confirm_Verification, Forgot_Password, Reset_Password, Logout_User }
