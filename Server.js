@@ -4,13 +4,17 @@ import dotenv from "dotenv";
 import cors from "cors";
 import UserRoutes from "./Routes/Users.js";
 import VideoRoutes from "./Routes/Videos.js";
+import AdminRoutes from "./Routes/Admin.js";
 
 
 
 
 const app = express();
 
-mongoose.connect('mongodb://127.0.0.1:27017/videoplatform');
+dotenv.config();
+
+// mongoose.connect('mongodb://127.0.0.1:27017/videoplatform');
+mongoose.connect(`mongodb+srv://perryaryeesci:${process.env.DBPASSWORD}@cluster1.lwgkhy4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1`);
 
 const db = mongoose.connection;
 
@@ -21,7 +25,7 @@ db.once('open', () => {
     console.log('Database connected successfully');
 })
 
-dotenv.config();
+
 
 app.use(express.json());
 
@@ -34,6 +38,7 @@ app.use(cors({
 
 app.use("/api/auth", UserRoutes);
 app.use("/api/video", VideoRoutes);
+app.use("/api/admin", AdminRoutes);
 
 
 app.use("/Videos", express.static("./Videos"));
