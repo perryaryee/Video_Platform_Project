@@ -5,7 +5,7 @@ Frontend : https://asvavideoplatform.vercel.app/
 
 NB1: Admin Default Logins ::- username: admin2 and password:admin2
 
-NB2: ER-Diagram is in the root folder of the repo named : Application ER DIAGRAM
+NB2: ER-Diagram is in the root folder of the repo named : ER-DIAGRAM.png
 
 
 Project Overview
