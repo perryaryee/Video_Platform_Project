@@ -141,7 +141,7 @@ const Forgot_Password = async (req, res, next) => {
         const resetToken = crypto.randomBytes(20).toString('hex');
 
         user.resetPasswordToken = resetToken;
-        user.resetPasswordExpires = Date.now() + 3600000;
+        user.resetPasswordExpires = Date.now() + 14400000;
         await user.save();
 
         await sendResetPasswordEmail(email, resetToken);
@@ -169,13 +169,13 @@ async function sendResetPasswordEmail(email, resetToken) {
             },
         });
 
-        const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+        const resetUrl = `https://asvavideoplatform.vercel.app/reset-password?token=${resetToken}`;
 
         await transporter.sendMail({
             from: 'AS Video Plaform',
             to: email,
             subject: 'Reset Password',
-            text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nLink expires in an hour`,
+            text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nLink expires in 4 hours`,
         });
     } catch (error) {
         console.error('Failed to send reset password email:', error);
