@@ -24,7 +24,7 @@ db.once('open', () => {
 app.use(express.json());
 
 app.use(cors({
-    origin: ["http://localhost:3000", "http://localhost:3001", "https://asvavideoplatform.vercel.app"],
+    origin: ["https://asvavideoplatform.vercel.app"],
     optionsSuccessStatus: 200,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders: "Content-Type,Authorization"
@@ -32,7 +32,7 @@ app.use(cors({
 
 
 app.options("*", cors({
-    origin: ["http://localhost:3000", "https://asvavideoplatform.vercel.app"],
+    origin: ["https://asvavideoplatform.vercel.app"],
     optionsSuccessStatus: 200,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders: "Content-Type,Authorization"
