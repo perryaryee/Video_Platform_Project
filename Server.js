@@ -11,6 +11,7 @@ const app = express();
 dotenv.config();
 
 mongoose.connect(`mongodb+srv://perryaryeesci:${process.env.DBPASSWORD}@cluster1.lwgkhy4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1`);
+// mongoose.connect("mongodb://127.0.01:27017/videoplatform");
 
 const db = mongoose.connection;
 
