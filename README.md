@@ -35,10 +35,13 @@ o Upload videos with titles and descriptions.
 Getting Started
 Prerequisites  Node js lastest version and git must be installed on computer to run this application. Installation
 1. Clone the repository:
-Frontend : https://github.com/perryaryee/Video_Platform_Frontend.git
+
 Backend : git clone https://github.com/perryaryee/Video_Platform_Project_Backend.git
-2. Navigate to the project directory : cd video-hosting-platform
-3. Install Dependencies : npm install
+
+Frontend : https://github.com/perryaryee/Video_Platform_Frontend.git
+
+3. Navigate to the project directory : cd video-hosting-platform
+4. Install Dependencies : npm install
 
 
 
