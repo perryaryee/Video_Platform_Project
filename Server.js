@@ -5,6 +5,9 @@ import cors from "cors";
 import UserRoutes from "./Routes/Users.js";
 import VideoRoutes from "./Routes/Videos.js";
 import AdminRoutes from "./Routes/Admin.js";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerui from "swagger-ui-express";
+
 
 const app = express();
 
@@ -42,6 +45,25 @@ app.use("/api/auth", UserRoutes);
 app.use("/api/video", VideoRoutes);
 app.use("/api/admin", AdminRoutes);
 app.use("/Videos", express.static("./Videos"));
+
+
+const options = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "Video Platform API docs"
+        },
+        servers: [
+            {
+                url: "https://video-platform-project-backend.onrender.com"
+            }
+        ]
+    },
+    apis: ["./Models/*.js","./Routes/.js",],
+}
+
+const spacs = swaggerJSDoc(options);
+app.use("/api-docs", swaggerui.serve, swaggerui.setup(spacs))
 
 const PORT = 5000;
 
